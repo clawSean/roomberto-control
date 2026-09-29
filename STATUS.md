@@ -22,8 +22,8 @@ Phase: implementation
   connection or device command occurred.
 - Owner-requested live canary: one `start` command received MQTT transport
   acknowledgment and JPop physically confirmed Roomberto launched. One later
-  `dock` command received MQTT transport acknowledgment; physical docking still
-  needs owner confirmation. The unnamed shadow omitted mission phase and battery
+  `dock` command received MQTT transport acknowledgment; JPop then confirmed
+  Roomberto physically returned to the dock. The unnamed shadow omitted mission phase and battery
   before/after, so transport acknowledgment is not treated as physical proof.
 
 ## Next

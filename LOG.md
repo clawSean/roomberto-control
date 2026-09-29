@@ -12,3 +12,6 @@
 - JPop requested a live launch: one `start` publish was transport-acknowledged,
   and JPop confirmed Roomberto physically launched. JPop then requested home:
   one `dock` publish was transport-acknowledged. No retry was sent.
+- JPop confirmed Roomberto physically returned to the dock. A later read-only
+  status still exposed neither mission phase nor battery, proving that owner
+  observation—not the unnamed shadow—is the effect-verification boundary.
