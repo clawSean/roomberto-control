@@ -9,3 +9,6 @@
   `Irobot - Roomberto` item in the Sean 1Password vault.
 - Live read-only discovery authenticated successfully and identified one Prime
   robot named Roomberto, SKU `Q311020`, with the BLID redacted.
+- JPop requested a live launch: one `start` publish was transport-acknowledged,
+  and JPop confirmed Roomberto physically launched. JPop then requested home:
+  one `dock` publish was transport-acknowledged. No retry was sent.

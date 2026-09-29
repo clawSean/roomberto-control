@@ -10,22 +10,37 @@ import roomberto
 
 def test_cli_has_only_read_only_device_operations() -> None:
     commands = set(roomberto.parser()._subparsers._group_actions[0].choices)
-    assert commands == {"discover", "status", "rooms"}
+    assert commands == {"discover", "status", "rooms", "launch", "home"}
 
 
 def test_source_does_not_expose_robot_write_methods() -> None:
     source = inspect.getsource(roomberto)
     forbidden = (
-        "send_simple_command",
         "clean_regions",
         "pause_mission",
         "resume_mission",
         "end_mission",
-        "dock",
         "update_settings",
         "edit_map",
     )
     assert not any(name in source for name in forbidden)
+
+
+def test_state_summary_extracts_only_operational_fields() -> None:
+    payload = {
+        "state": {
+            "reported": {
+                "batPct": 88,
+                "cleanMissionStatus": {"phase": "charge", "error": 0},
+                "private": "not returned",
+            }
+        }
+    }
+    assert roomberto._state_summary(payload) == {
+        "phase": "charge",
+        "battery_percent": 88,
+        "error": 0,
+    }
 
 
 def test_redacted_id_is_stable_and_hides_original() -> None:

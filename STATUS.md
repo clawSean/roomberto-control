@@ -20,9 +20,14 @@ Phase: implementation
 - First live read-only account discovery passed: one Prime-generation robot,
   name `Roomberto`, SKU `Q311020`; BLID was redacted in output. No robot
   connection or device command occurred.
+- Owner-requested live canary: one `start` command received MQTT transport
+  acknowledgment and JPop physically confirmed Roomberto launched. One later
+  `dock` command received MQTT transport acknowledgment; physical docking still
+  needs owner confirmation. The unnamed shadow omitted mission phase and battery
+  before/after, so transport acknowledgment is not treated as physical proof.
 
 ## Next
 
-1. Read current state and resolve map/room IDs through one bounded read-only
-   inspection session.
-2. Ask separately before adding or running any robot-moving canary.
+1. Resolve map/room IDs through one bounded read-only inspection session.
+2. Preserve explicit owner authorization and human confirmation for commands
+   whose physical effect cannot be verified from the cloud shadow.

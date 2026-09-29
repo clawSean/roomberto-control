@@ -13,8 +13,10 @@ Guarded read-only access to a Roomba Combo 105 through iRobot's cloud.
   runtime; values are never command-line arguments, config files, or logs.
 - Each CLI invocation makes at most one initial login attempt. There is no
   blind retry loop or `auto_refresh` credential closure.
-- The CLI exposes only `setup`, `discover`, `status`, and `rooms`. It has no
-  cleaning, pause, stop, dock, schedule, settings, or map-edit command.
+- The CLI exposes read-only `discover`, `status`, and `rooms`, plus one guarded
+  `launch` and `home` actions that send exactly one whole-home `start` or
+  `dock`. It has no room targeting, pause, stop, schedule, settings, or map-edit
+  command.
 
 ## Setup
 
@@ -32,6 +34,8 @@ For a multi-robot account, pass the full BLID locally:
 ```bash
 uv run roomberto.py status --blid '<full-blid>'
 uv run roomberto.py rooms --blid '<full-blid>'
+uv run roomberto.py launch --blid '<full-blid>'
+uv run roomberto.py home --blid '<full-blid>'
 ```
 
 The BLID is not persisted by this project.

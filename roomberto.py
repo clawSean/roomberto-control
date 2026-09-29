@@ -71,6 +71,28 @@ def _json_safe(value: Any) -> Any:
     return str(value)
 
 
+def _reported(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {}
+    state = payload.get("state")
+    if not isinstance(state, dict):
+        return {}
+    reported = state.get("reported")
+    return reported if isinstance(reported, dict) else {}
+
+
+def _state_summary(payload: Any) -> dict[str, Any]:
+    reported = _reported(payload)
+    mission = reported.get("cleanMissionStatus")
+    if not isinstance(mission, dict):
+        mission = {}
+    return {
+        "phase": mission.get("phase"),
+        "battery_percent": reported.get("batPct"),
+        "error": mission.get("error"),
+    }
+
+
 def _select_blid(account: CloudAccount, requested: str | None) -> str:
     if requested:
         if requested not in account.robots:
@@ -173,6 +195,50 @@ async def rooms(blid: str | None) -> dict[str, Any]:
         await session.close()
 
 
+async def _simple_action(blid: str | None, command: str) -> dict[str, Any]:
+    """Send exactly one confirmed basic command without retrying."""
+    session, account = await _login()
+    robot = None
+    try:
+        selected = _select_blid(account, blid)
+        robot = await account.prime_robot(selected, auto_refresh=False)
+        await robot.connect(timeout=10.0)
+        before = _state_summary((await robot.get_state(timeout=8.0)).payload)
+        if command == "start" and before["phase"] == "run":
+            return {
+                "ok": True,
+                "command_sent": False,
+                "reason": "already_running",
+                "before": before,
+                "after": before,
+            }
+        acknowledged = await robot.send_simple_command(command)
+        await asyncio.sleep(5)
+        after = _state_summary((await robot.get_state(timeout=8.0)).payload)
+        return {
+            # Prime 105's unnamed shadow may omit live mission fields. A broker
+            # acknowledgment proves delivery, not physical effect.
+            "ok": bool(acknowledged),
+            "command": command,
+            "command_sent": True,
+            "transport_acknowledged": acknowledged,
+            "before": before,
+            "after": after,
+        }
+    finally:
+        if robot is not None:
+            await robot.disconnect()
+        await session.close()
+
+
+async def launch(blid: str | None) -> dict[str, Any]:
+    return await _simple_action(blid, "start")
+
+
+async def home(blid: str | None) -> dict[str, Any]:
+    return await _simple_action(blid, "dock")
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     sub = result.add_subparsers(dest="command", required=True)
@@ -180,6 +246,8 @@ def parser() -> argparse.ArgumentParser:
     for name, help_text in (
         ("status", "Read the selected robot's current state"),
         ("rooms", "Read map and room identifiers"),
+        ("launch", "Start one whole-home cleaning mission"),
+        ("home", "Send Roomberto back to the dock"),
     ):
         command = sub.add_parser(name, help=help_text)
         command.add_argument("--blid", help="Exact robot BLID; not persisted")
@@ -195,6 +263,10 @@ def main() -> int:
             output = asyncio.run(status(args.blid))
         elif args.command == "rooms":
             output = asyncio.run(rooms(args.blid))
+        elif args.command == "launch":
+            output = asyncio.run(launch(args.blid))
+        elif args.command == "home":
+            output = asyncio.run(home(args.blid))
         else:  # pragma: no cover
             raise AssertionError("unreachable")
         print(json.dumps(output, indent=2, sort_keys=True))
