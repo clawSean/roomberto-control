@@ -10,7 +10,7 @@ import roomberto
 
 def test_cli_has_only_read_only_device_operations() -> None:
     commands = set(roomberto.parser()._subparsers._group_actions[0].choices)
-    assert commands == {"setup", "delete-credentials", "discover", "status", "rooms"}
+    assert commands == {"discover", "status", "rooms"}
 
 
 def test_source_does_not_expose_robot_write_methods() -> None:
@@ -48,18 +48,20 @@ def test_select_blid_rejects_unknown_robot() -> None:
         roomberto._select_blid(account, "wrong")
 
 
-def test_keychain_write_uses_stdin_not_argv(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_1password_read_uses_reference_not_secret(monkeypatch: pytest.MonkeyPatch) -> None:
     seen = {}
 
-    def fake_security(*args: str, input_text: str | None = None):
-        seen["args"] = args
-        seen["input"] = input_text
-        return SimpleNamespace(returncode=0)
+    monkeypatch.setattr(roomberto.shutil, "which", lambda _: "/safe/op")
 
-    monkeypatch.setattr(roomberto, "_security", fake_security)
-    roomberto._keychain_put("password", "very-secret")
-    assert "very-secret" not in seen["args"]
-    assert seen["input"] == "very-secret\nvery-secret\n"
+    def fake_run(args, **kwargs):
+        seen["args"] = args
+        return SimpleNamespace(returncode=0, stdout="very-secret\n")
+
+    monkeypatch.setattr(roomberto.subprocess, "run", fake_run)
+    assert roomberto._op_read("password") == "very-secret"
+    assert seen["args"] == [
+        "/safe/op", "read", "op://Sean/Irobot - Roomberto/password"
+    ]
 
 
 def test_json_safe_handles_enums_and_nested_values() -> None:

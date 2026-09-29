@@ -22,7 +22,7 @@
     "Library is unofficial and depends on iRobot, Gigya, AWS Cognito, AWS IoT, and REST services.",
     "Downloaded map bundles are parsed in memory and are not extracted to disk.",
     "No blind authentication retry loop was found; local adapter performs one initial login attempt.",
-    "A nonsecret macOS Keychain write/read/delete canary passed; secrets are supplied over stdin rather than argv.",
+    "1Password is the sole credential source; the adapter reads only username/password fields at runtime through op read.",
     "Release tag is unsigned, so installation is pinned to the verified commit object rather than trusting the tag alone."
   ],
   "verdict": "acceptable for isolated read-only pilot with Keychain credentials and no optional command tools"
