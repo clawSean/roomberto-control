@@ -1,0 +1,29 @@
+{
+  "reviewed_at": "2026-09-29",
+  "upstream": "https://github.com/johnnyh1975/roombapy-prime",
+  "tag": "v0.4.0",
+  "commit": "8fce9139822886ab03aceb5a5787eb851cc0a095",
+  "commit_verification": "GitHub verified",
+  "tag_signature": "unsigned annotated release tag",
+  "upstream_ci": "success",
+  "upstream_codeql": "success",
+  "dependency_audit": "no known vulnerabilities",
+  "static_scan": "no medium or high Bandit findings",
+  "upstream_tests": "1303 passed, 1 skipped",
+  "local_tests": "7 passed",
+  "license": "MIT",
+  "base_dependencies": ["aiohttp>=3.9", "paho-mqtt>=2.0,<3.0", "certifi"],
+  "excluded": ["roombapy-prime-tools", "map extra"],
+  "findings": [
+    "Core library has no subprocess or shell execution path.",
+    "Core library stores no files; diagnostic output is opt-in.",
+    "Credentials and cloud tokens are held in memory during a process.",
+    "auto_refresh retains username/password in a closure; local adapter disables it.",
+    "Library is unofficial and depends on iRobot, Gigya, AWS Cognito, AWS IoT, and REST services.",
+    "Downloaded map bundles are parsed in memory and are not extracted to disk.",
+    "No blind authentication retry loop was found; local adapter performs one initial login attempt.",
+    "A nonsecret macOS Keychain write/read/delete canary passed; secrets are supplied over stdin rather than argv.",
+    "Release tag is unsigned, so installation is pinned to the verified commit object rather than trusting the tag alone."
+  ],
+  "verdict": "acceptable for isolated read-only pilot with Keychain credentials and no optional command tools"
+}
